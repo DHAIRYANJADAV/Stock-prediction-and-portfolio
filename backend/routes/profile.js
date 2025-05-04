@@ -5,7 +5,6 @@ const bcrypt = require("bcrypt");
 
 const router = express.Router();
 
-//  Update user profile
 router.put("/update", authenticateJWT, async (req, res) => {
     const userId = req.user.id;
     const { name, email } = req.body;
@@ -28,7 +27,7 @@ router.put("/update", authenticateJWT, async (req, res) => {
             values.push(email);
         }
 
-        values.push(userId); // Last value is userId
+        values.push(userId);
 
         const result = await db.query(
             `UPDATE users SET ${fields.join(", ")} WHERE id = $${queryIdx} RETURNING id, name, email, created_at`,
@@ -42,9 +41,6 @@ router.put("/update", authenticateJWT, async (req, res) => {
     }
 });
 
-
-
-//  Change user password
 router.put("/change-password", authenticateJWT, async (req, res) => {
     const userId = req.user.id;
     const { oldPassword, newPassword } = req.body;
@@ -54,7 +50,6 @@ router.put("/change-password", authenticateJWT, async (req, res) => {
     }
 
     try {
-        // Fetch current hashed password from DB
         const result = await db.query("SELECT password FROM users WHERE id = $1", [userId]);
         const user = result.rows[0];
 
@@ -62,16 +57,12 @@ router.put("/change-password", authenticateJWT, async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
 
-        // Compare old password
         const isMatch = await bcrypt.compare(oldPassword, user.password);
         if (!isMatch) {
             return res.status(401).json({ error: "Old password is incorrect" });
         }
-
-        // Hash new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update password
         await db.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, userId]);
 
         res.json({ message: "Password changed successfully" });
