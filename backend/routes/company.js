@@ -6,7 +6,6 @@ require("dotenv").config();
 
 const STOCK_API_KEY = process.env.STOCK_API_KEY;
 
-// Get company details
 router.get("/:symbol",authenticateJWT, async (req, res) => {
     const { symbol } = req.params;
 
@@ -16,7 +15,6 @@ router.get("/:symbol",authenticateJWT, async (req, res) => {
 
     try {
         const response = await axios.get(
-            `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${STOCK_API_KEY}`
         );
 
         if (!response.data || response.data.length === 0) {
