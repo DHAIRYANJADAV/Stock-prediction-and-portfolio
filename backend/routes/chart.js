@@ -6,7 +6,6 @@ require("dotenv").config();
 
 const STOCK_API_KEY = process.env.STOCK_API_KEY; 
 
-// Get historical stock data for chart visualization
 router.get("/:symbol",authenticateJWT, async (req, res) => {
     const { symbol } = req.params;
     const { from, to } = req.query;
@@ -17,7 +16,6 @@ router.get("/:symbol",authenticateJWT, async (req, res) => {
 
     try {
         const response = await axios.get(
-            `https://financialmodelingprep.com/api/v3/historical-price-full/${symbol}?from=${from}&to=${to}&apikey=${STOCK_API_KEY}`
         );
 
         if (!response.data.historical || response.data.historical.length === 0) {
