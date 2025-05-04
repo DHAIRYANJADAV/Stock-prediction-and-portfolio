@@ -27,16 +27,13 @@ router.post("/users",
         const { name, email, password } = req.body;
 
         try {
-            //Hash the password before storing
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Insert into database
             const result = await db.query(
                 "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
                 [name, email, hashedPassword]
             );
 
-            // Do not return password in response for security
             const user = {
                 id: result.rows[0].id,
                 name: result.rows[0].name,
@@ -57,7 +54,6 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Find user by email
         const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
         const user = result.rows[0];
 
@@ -65,20 +61,17 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ error: "User not found" });
         }
 
-        // Compare password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ error: "Invalid password" });
         }
 
-        // Generate JWT Token
         const token = jwt.sign(
-            { id: user.id, name: user.name, email: user.email }, // Payload
-            process.env.JWT_SECRET, // Secret key
-            { expiresIn: "1h" } // Token expiry time
+            { id: user.id, name: user.name, email: user.email },
+            process.env.JWT_SECRET, 
+            { expiresIn: "1h" } 
         );
 
-        // Success response with token
         res.status(200).json({
             message: "Login successful",
             token: token,
@@ -90,13 +83,10 @@ router.post("/login", async (req, res) => {
     }
 });
 
-// Protected route 
 router.get("/profile", authenticateJWT, async (req, res) => {
     try {
-        // Access user data from token
         const userId = req.user.id;
 
-        // Fetch user data (excluding password)
         const result = await db.query(
             "SELECT id, name, email, created_at FROM users WHERE id = $1",
             [userId]
@@ -110,7 +100,6 @@ router.get("/profile", authenticateJWT, async (req, res) => {
     }
 });
 
-// get all user admin
 router.get("/users", authenticateJWT, async (req, res) => {
     try {
         const result = await db.query("SELECT id, name, email, created_at FROM users");
@@ -121,7 +110,6 @@ router.get("/users", authenticateJWT, async (req, res) => {
     }
 });
 
-// Get user by ID
 router.get("/users/:id", authenticateJWT, async (req, res) => {
     const userId = req.params.id;
     try {
@@ -139,7 +127,6 @@ router.get("/users/:id", authenticateJWT, async (req, res) => {
     }
 });
 
-// Update user by ID
 router.put("/users/:id", authenticateJWT, async (req, res) => {
     const userId = req.params.id;
     const { name, email, password } = req.body;
@@ -161,7 +148,6 @@ router.put("/users/:id", authenticateJWT, async (req, res) => {
     }
 });
 
-// Delete user by ID
 router.delete("/users/:id", authenticateJWT, async (req, res) => {
     const userId = req.params.id;
     try {
