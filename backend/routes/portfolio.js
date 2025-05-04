@@ -1,10 +1,9 @@
 const express = require("express");
-const db = require("../db"); // Your database connection
-const { authenticateJWT } = require("../middleware"); // JWT middleware to protect routes
+const db = require("../db"); 
+const { authenticateJWT } = require("../middleware");
 
 const router = express.Router();
 
-// Add stock to user's portfolio
 router.post("/", authenticateJWT, async (req, res) => {
     const { stock_symbol } = req.body;
     const userId = req.user.id;
@@ -21,7 +20,6 @@ router.post("/", authenticateJWT, async (req, res) => {
     }
 });
 
-//  Get user's portfolio
 router.get("/", authenticateJWT, async (req, res) => {
     const userId = req.user.id;
 
@@ -37,7 +35,6 @@ router.get("/", authenticateJWT, async (req, res) => {
     }
 });
 
-//  Remove stock from user's portfolio
 router.delete("/", authenticateJWT, async (req, res) => {
     const { stock_symbol } = req.body;
     const userId = req.user.id;
@@ -58,12 +55,10 @@ router.delete("/", authenticateJWT, async (req, res) => {
 });
 
 
-// Get user's portfolio with live prices
 router.get("/live", authenticateJWT, async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // 1. Get user's portfolio stocks
         const result = await db.query(
             "SELECT stock_symbol FROM portfolio WHERE user_id = $1",
             [userId]
@@ -75,12 +70,10 @@ router.get("/live", authenticateJWT, async (req, res) => {
             return res.json({ message: "No stocks in portfolio" });
         }
 
-        // 2. Fetch live prices from FMP API
         const stockList = stocks.join(',');
-        const response = await fetch(`https://financialmodelingprep.com/api/v3/quote/${stockList}?apikey=${process.env.STOCK_API_KEY}`);
+        const response = await fetch(``);
         const data = await response.json();
 
-        // 3. Return stock data
         res.json(data);
 
     } catch (error) {
