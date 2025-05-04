@@ -6,7 +6,6 @@ require("dotenv").config();
 
 const STOCK_API_KEY = process.env.STOCK_API_KEY;
 
-// Search stocks by name or symbol
 router.get("/",authenticateJWT, async (req, res) => {
     const { query } = req.query;
 
@@ -16,7 +15,7 @@ router.get("/",authenticateJWT, async (req, res) => {
 
     try {
         const response = await axios.get(
-            `https://financialmodelingprep.com/api/v3/search?query=${query}&limit=10&exchange=NASDAQ&apikey=${STOCK_API_KEY}`
+            ``
         );
 
         res.json(response.data);
